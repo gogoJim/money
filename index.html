@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>受保護的創意作品集 | 個人網站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #fefcf7;
+            color: #2d2a24;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 簡易導航（實際內容受保護） */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .nav a {
+            margin-left: 2rem;
+            text-decoration: none;
+            color: #2d2a24;
+            font-weight: 500;
+            transition: color 0.2s;
+            pointer-events: auto;
+        }
+
+        .nav a:hover {
+            color: #b45309;
+        }
+
+        /* Hero 區域 */
+        .hero {
+            text-align: center;
+            padding: 5rem 1rem 4rem;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .hero .highlight {
+            color: #b45309;
+            border-bottom: 3px solid #fcd34d;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 1rem auto 0;
+            color: #5b5348;
+        }
+
+        /* 作品集網格 */
+        .portfolio {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 5%;
+            width: 100%;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .project {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .project:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.1);
+        }
+
+        .project-img {
+            background-color: #e7e5e4;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #78716c;
+        }
+
+        .project-info {
+            padding: 1.5rem;
+        }
+
+        .project-info h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .project-info p {
+            color: #5b5348;
+            font-size: 0.9rem;
+        }
+
+        /* 保留預留連結區塊 - 連結放置區 */
+        .external-links-section {
+            max-width: 1200px;
+            margin: 3rem auto 2rem;
+            padding: 0 5%;
+            width: 100%;
+        }
+
+        .links-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0ede8;
+            transition: all 0.2s;
+        }
+
+        .links-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .links-card h3:before {
+            content: "🔗";
+            font-size: 1.4rem;
+        }
+
+        .link-placeholder {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .custom-link-item {
+            background: #fef7e6;
+            padding: 0.75rem 1.5rem;
+            border-radius: 60px;
+            text-decoration: none;
+            color: #b45309;
+            font-weight: 500;
+            transition: 0.2s;
+            border: 1px solid #fde68a;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .custom-link-item:hover {
+            background: #fffbeb;
+            border-color: #f59e0b;
+            transform: translateY(-2px);
+        }
+
+        .add-link-hint {
+            font-size: 0.85rem;
+            color: #78716c;
+            margin-top: 1rem;
+            border-top: 1px dashed #e7e5e4;
+            padding-top: 1rem;
+        }
+
+        /* 頁尾 */
+        .footer {
+            text-align: center;
+            padding: 3rem 1rem;
+            margin-top: 2rem;
+            border-top: 1px solid #e7e5e4;
+            color: #78716c;
+        }
+
+        /* 密碼模態框 (輕量級保護) */
+        .password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .password-modal {
+            background: #fefcf7;
+            border-radius: 2rem;
+            max-width: 420px;
+            width: 90%;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 30px 40px -15px rgba(0, 0, 0, 0.3);
+            border: 1px solid #e9e5dc;
+        }
+
+        .password-modal h2 {
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .password-modal p {
+            color: #5b5348;
+            margin-bottom: 1.8rem;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            font-size: 1rem;
+            border: 2px solid #e7e5e4;
+            border-radius: 60px;
+            background: white;
+            outline: none;
+            transition: 0.2s;
+            font-family: monospace;
+        }
+
+        .password-input:focus {
+            border-color: #b45309;
+            box-shadow: 0 0 0 2px rgba(180, 83, 9, 0.2);
+        }
+
+        .password-btn {
+            background: #2d2a24;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-top: 1.2rem;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .password-btn:hover {
+            background: #b45309;
+            transform: scale(0.98);
+        }
+
+        .error-msg {
+            color: #c2410c;
+            font-size: 0.85rem;
+            margin-top: 0.8rem;
+            min-height: 2rem;
+        }
+
+        /* 受保護的主要內容，預設隱藏 */
+        .protected-content {
+            display: none;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* 右鍵禁用提示 */
+        body.disable-select {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .nav a {
+                margin: 0 1rem;
+            }
+            .links-card h3 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 密碼保護遮罩層 -->
+<div id="passwordOverlay" class="password-overlay">
+    <div class="password-modal">
+        <h2>🔒 驗證進入</h2>
+        <p>請輸入密碼以瀏覽作品集</p>
+        <input type="password" id="passwordInput" class="password-input" placeholder="請輸入密碼" autocomplete="off">
+        <button id="submitPasswordBtn" class="password-btn">解鎖進入</button>
+        <div id="errorMsg" class="error-msg"></div>
+        <div style="margin-top: 1rem; font-size: 0.7rem; color: #a8a29e;">提示: 預設密碼為 <strong style="color:#b45309;">***</strong></div>
+    </div>
+</div>
+
+<!-- 受保護的主要內容區塊 (密碼正確後顯示) -->
+<div id="protectedContent" class="protected-content">
+    <div class="header">
+        <div class="logo">Chen Wei</div>
+        <div class="nav">
+            <a href="#">作品</a>
+            <a href="#">關於</a>
+            <a href="#">聯絡</a>
+        </div>
+    </div>
+
+    <div class="hero">
+        <h1>視覺敘事者 <span class="highlight">&</span> 設計實驗家</h1>
+        <p>透過設計、攝影與互動，探索美學與功能之間的平衡。</p>
+    </div>
+
+    <div class="portfolio">
+        <h2 class="section-title">精選作品</h2>
+        <div class="grid">
+            <!-- ========= 修改重點: 為每個 project 加上 data-link 屬性 ========= -->
+            <!-- 品牌識別卡片：點擊後前往 brand-identity.html (可自訂路徑) -->
+			
+          <div class="project" data-link="個人理財-24-2.html">  
+                <div class="project-img">📷 品牌識別</div>
+                <div class="project-info">
+                    <h3>自然之聲</h3>
+                    <p>完整品牌識別系統，涵蓋包裝與視覺應用。</p>
+                </div>
+            </div>
+            <!-- 網站設計卡片：點擊後前往 gallery-online.html -->
+            <div class="project" data-link="基金管理-10-8.html">
+                <div class="project-img">🎨 網站設計</div>
+                <div class="project-info">
+                    <h3>藝廊線上展</h3>
+                    <p>互動式虛擬展間，提升觀展體驗。</p>
+                </div>
+            </div>
+            <!-- 動態圖像卡片：點擊後前往 motion-city.html -->
+            <div class="project" data-link="motion-city.html">
+                <div class="project-img">📱 動態圖像</div>
+                <div class="project-info">
+                    <h3>流動城市</h3>
+                    <p>Motion graphics 短片，探索都市節奏。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="footer">
+        <p>© 2025 Chen Wei — 基於好奇心與細節打造 | 受密碼保護頁面</p>
+    </div>
+</div>
+
+<script>
+    // ------------------------------
+    // 1. 密碼驗證 與 保護邏輯 (localStorage 簡易記住 session，關閉瀏覽器失效)
+    // ------------------------------
+    const PASSWORD_HASH = btoa('2026'); // 預設密碼 2026, 使用 Base64 簡單編碼避免明碼裸露 (基礎混淆)
+    // 實際驗證函數
+    function verifyPassword(inputPwd) {
+        // 比對輸入密碼經過相同編碼與儲存 hash 是否一致
+        return btoa(inputPwd) === PASSWORD_HASH;
+    }
+
+    const overlay = document.getElementById('passwordOverlay');
+    const protectedDiv = document.getElementById('protectedContent');
+    const passwordInput = document.getElementById('passwordInput');
+    const submitBtn = document.getElementById('submitPasswordBtn');
+    const errorMsgSpan = document.getElementById('errorMsg');
+
+    // 輔助: 解鎖內容並隱藏遮罩
+    function unlockSite() {
+        overlay.style.opacity = '0';
+        // 動畫後隱藏遮罩，但仍然確保無法右鍵注入
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            protectedDiv.style.display = 'block';
+            document.body.style.overflow = 'auto';
+            // 對主內容額外添加防護標誌 （右鍵防護繼續生效）
+        }, 200);
+        // 記住這次登入狀態 (sessionStorage 僅當前標籤頁有效)
+        sessionStorage.setItem('siteUnlocked', 'true');
+    }
+
+    // 檢查是否已解鎖
+    function checkUnlockStatus() {
+        const unlocked = sessionStorage.getItem('siteUnlocked');
+        if (unlocked === 'true') {
+            // 直接解鎖
+            overlay.style.display = 'none';
+            protectedDiv.style.display = 'block';
+            document.body.style.overflow = 'auto';
+        } else {
+            overlay.style.display = 'flex';
+            protectedDiv.style.display = 'none';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    // 處理密碼提交
+    function handlePasswordSubmit() {
+        const pwd = passwordInput.value.trim();
+        if (!pwd) {
+            errorMsgSpan.innerText = '❓ 請輸入密碼';
+            return;
+        }
+        if (verifyPassword(pwd)) {
+            errorMsgSpan.innerText = '';
+            unlockSite();
+        } else {
+            errorMsgSpan.innerText = '⛔ 密碼錯誤，請重新輸入';
+            passwordInput.value = '';
+            passwordInput.focus();
+            // 震動效果 (簡單)
+            const modal = document.querySelector('.password-modal');
+            if (modal) {
+                modal.style.transform = 'translateX(4px)';
+                setTimeout(() => { if(modal) modal.style.transform = ''; }, 100);
+            }
+        }
+    }
+
+    // 綁定事件
+    submitBtn.addEventListener('click', handlePasswordSubmit);
+    passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handlePasswordSubmit();
+        }
+    });
+
+    // ---------- 強化保護: 完全禁用右鍵 (contextmenu) ----------
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // 禁用 F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U (檢視原始碼), Ctrl+S 儲存等常見開發者工具快捷鍵
+    document.addEventListener('keydown', function(e) {
+        // 防止 F12
+        if (e.key === 'F12') {
+            e.preventDefault();
+            return false;
+        }
+        // 防止 Ctrl+Shift+I / Ctrl+Shift+C / Ctrl+Shift+J (Windows / Linux 開發者工具)
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
+            e.preventDefault();
+            return false;
+        }
+        // 防止 Ctrl+U (檢視原始碼)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u')) {
+            e.preventDefault();
+            return false;
+        }
+        // 防止 Ctrl+S 儲存網頁 (避免另存)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+            e.preventDefault();
+            return false;
+        }
+        // 防止 Ctrl+Shift+P (命令選單) 在某些瀏覽器打開開發者工具
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'P' || e.key === 'p')) {
+            e.preventDefault();
+            return false;
+        }
+        // 防止 Ctrl+Shift+K (Firefox 主控台)
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'K' || e.key === 'k')) {
+            e.preventDefault();
+            return false;
+        }
+        // 額外防止 Ctrl+[ 某些快捷
+        if (e.ctrlKey && e.key === '`') {
+            e.preventDefault();
+        }
+    });
+
+    // 額外禁用元素選取 (增加文字選取保護，但保留輸入框選取)
+    document.body.style.userSelect = 'none';
+    document.body.style.webkitUserSelect = 'none';
+    // 但確保密碼輸入框內可以選取，不受影響
+    if (passwordInput) {
+        passwordInput.style.userSelect = 'text';
+        passwordInput.style.webkitUserSelect = 'text';
+    }
+
+    // 禁止拖曳圖片或元素（防止簡單偷圖）
+    function preventDragOnAll(e) {
+        e.preventDefault();
+    }
+    document.addEventListener('dragstart', preventDragOnAll);
+
+    // 2. 新增核心功能：作品卡片點擊跳轉至外部 HTML 檔案（品牌識別、網站設計、動態圖像）
+    // 為每個 .project 綁定點擊事件，讀取 data-link 屬性並進行頁面跳轉
+    function bindProjectClickEvents() {
+        const projects = document.querySelectorAll('.project');
+        projects.forEach(project => {
+            // 移除可能重複綁定的事件，先清除再綁定
+            project.removeEventListener('click', handleProjectClick);
+            project.addEventListener('click', handleProjectClick);
+        });
+    }
+
+    // 實際點擊處理函數
+    function handleProjectClick(event) {
+        // 確保點擊不會因冒泡干擾 (不需要阻止，但避免內部可能產生衝突)
+        // 獲取當前卡片的 data-link 屬性值
+        const targetCard = event.currentTarget;
+        const linkUrl = targetCard.getAttribute('data-link');
+        
+        if (linkUrl && linkUrl.trim() !== '') {
+            // 如果設定了連結，進行頁面跳轉
+            window.location.href = linkUrl;
+        } else {
+            // 如果沒有設置 data-link，可以選擇不做任何事或提示（為確保體驗不跳轉）
+            console.log('此作品卡片尚未設定連結，請添加 data-link 屬性');
+        }
+    }
+
+    // 額外保護: 針對作品卡片內可能包含其他可點擊元素時，避免干擾，保留整體卡片點擊轉跳即可
+    // 並且我們也保留這些卡片在右鍵禁用時仍然正常點擊
+    
+    // ------------------------------------------------------------
+    // 3. 確保解鎖後動態添加卡片點擊事件 (因為解鎖後 .project 才存在於 DOM)
+    // 原本 protected-content 在解鎖前 display: none，所以需要等顯示後再綁定
+    // 同時使用 MutationObserver 監聽或簡單在解鎖後調用綁定函數
+    // 修改 unlockSite 函數，當解鎖完成顯示主內容後，綁定卡片事件
+    const originalUnlock = unlockSite;
+    window.unlockSite = function() {
+        originalUnlock();
+        // 確保頁面顯示後，project 元素已存在，再綁定點擊事件
+        setTimeout(() => {
+            bindProjectClickEvents();
+        }, 100);
+    };
+    // 覆蓋原本 unlockSite 以確保綁定
+    unlockSite = function() {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            protectedDiv.style.display = 'block';
+            document.body.style.overflow = 'auto';
+            bindProjectClickEvents();   // 關鍵：解鎖後綁定卡片跳轉事件
+        }, 200);
+        sessionStorage.setItem('siteUnlocked', 'true');
+    };
+    
+    // 如果已經透過 sessionStorage 解鎖，則頁面載入時顯示主內容，同樣也要綁定事件
+    window.addEventListener('DOMContentLoaded', () => {
+        checkUnlockStatus();
+        // 如果已經解鎖，則正確顯示保護內容時再綁定卡片點擊事件及額外防護
+        if (sessionStorage.getItem('siteUnlocked') === 'true') {
+            protectedDiv.style.display = 'block';
+            overlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            bindProjectClickEvents();   // 確保已解鎖狀態下卡片點擊跳轉生效
+        } else {
+            protectedDiv.style.display = 'none';
+            overlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            if (passwordInput) passwordInput.focus();
+        }
+        
+        // 再次確保右鍵禁用全域生效
+        document.body.addEventListener('contextmenu', (e) => e.preventDefault());
+        
+        // 針對連結區塊動態增加拖曳保護，並防止任何可能的圖片拖曳(即便沒有圖片)
+        const allElements = document.querySelectorAll('.project, .custom-link-item');
+        allElements.forEach(el => {
+            el.addEventListener('dragstart', preventDragOnAll);
+        });
+        
+        // 監聽動態內容，確保未來新增的 .project 也能綁定跳轉事件
+        const observer = new MutationObserver(() => {
+            // 每當 DOM 有變化時，重新綁定卡片事件（確保動態新增的卡片也有跳轉功能）
+            bindProjectClickEvents();
+            // 另外再保護所有拖曳事件
+            document.querySelectorAll('.project, .custom-link-item, .project-img').forEach(el => {
+                el.addEventListener('dragstart', preventDragOnAll);
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+        
+        // 給所有作品項目加上簡單的控制台防禦提示
+        console.log("%c⚠️ 開發者工具已限制部分功能，請尊重創作內容。", "color: #b45309; font-size: 14px;");
+        
+        // 可以讓 '預留我的連接網頁放置位置' 更加靈活: 提供開發者備註說明
+        const linkContainer = document.getElementById('dynamicLinksContainer');
+        if (linkContainer) {
+            // 提示使用方式: 可以在這裡動態生成或允許編輯，保留完全控制
+            // 不做自動覆蓋，確保使用者自行修改原始連結位置即可
+        }
+    });
+    
+    // 同時也要處理若密碼輸入成功後並顯示內容，確保覆蓋所有情境
+    // 另外調整原本 submitBtn 監聽使用新的 unlockSite
+    submitBtn.removeEventListener('click', handlePasswordSubmit);
+    submitBtn.addEventListener('click', () => {
+        const pwd = passwordInput.value.trim();
+        if (!pwd) {
+            errorMsgSpan.innerText = '❓ 請輸入密碼';
+            return;
+        }
+        if (verifyPassword(pwd)) {
+            errorMsgSpan.innerText = '';
+            unlockSite();  // 這裡會執行包含綁定事件的版本
+        } else {
+            errorMsgSpan.innerText = '⛔ 密碼錯誤，請重新輸入';
+            passwordInput.value = '';
+            passwordInput.focus();
+            const modal = document.querySelector('.password-modal');
+            if (modal) {
+                modal.style.transform = 'translateX(4px)';
+                setTimeout(() => { if(modal) modal.style.transform = ''; }, 100);
+            }
+        }
+    });
+    
+    // 加上對 data-link 屬性的便利提醒: 使用者可以自行修改每個卡片要跳轉的 html 路徑
+    // 品牌識別 -> brand-identity.html
+    // 網站設計 -> gallery-online.html
+    // 動態圖像 -> motion-city.html
+    // 修改方式: 直接編輯上方 .project 的 data-link 值
+    
+    // 為了讓右鍵禁用的情況下，依然能正常使用卡片點擊，無需另外處理。
+    // 完成功能: 點選 "品牌識別" 卡片後會進入 brand-identity.html
+    // 同時保留密碼保護、F12/右鍵禁用以及預留連結位置
+</script>
+</body>
+</html>
