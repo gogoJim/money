@@ -2046,32 +2046,52 @@ const ReportExporter = {
         URL.revokeObjectURL(a.href);
     },
     
-    exportJsonData: function() {
-        try {
-            const data = {
-                accounts: AppState.getAccounts(),
-                transactions: AppState.getTransactions(),
-                budgets: AppState.getBudgets(),
-                categoryStructure: AppState.getCategoryStructure(),
-                recurringRules: AppState.getRecurringRules(),
-                exportDate: new Date().toISOString(),
-                version: '2.0',
-                userName: UserProfile.getCurrentUserName()
-            };
-            const jsonStr = JSON.stringify(data, null, 2);
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = UserProfile.getJsonExportFilename();
-            link.click();
-            URL.revokeObjectURL(url);
-            Utils.showToast('資料已匯出');
-        } catch (error) {
-            console.error('匯出資料失敗:', error);
-            showError('匯出資料失敗');
+exportJsonData: function() {
+    try {
+        const data = {
+            accounts: AppState.getAccounts(),
+            transactions: AppState.getTransactions(),
+            budgets: AppState.getBudgets(),
+            categoryStructure: AppState.getCategoryStructure(),
+            recurringRules: AppState.getRecurringRules()
+        };
+        
+        // 使用統一的包裝格式
+        const backupData = {
+            version: '2.0',
+            backupTime: new Date().toISOString(),
+            exportDate: new Date().toISOString(),
+            userName: UserProfile.getCurrentUserName(),
+            data: data,
+            stats: {
+                accountCount: data.accounts.length,
+                transactionCount: data.transactions.length,
+                budgetCount: Object.keys(data.budgets).length,
+                recurringCount: data.recurringRules.length
+            }
+        };
+        
+        // 加入 checksum 用於完整性驗證
+        if (typeof DataValidator !== 'undefined' && DataValidator.generateChecksum) {
+            backupData.checksum = DataValidator.generateChecksum(data);
         }
-    },
+        
+        const jsonStr = JSON.stringify(backupData, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = UserProfile.getJsonExportFilename();
+        link.click();
+        URL.revokeObjectURL(url);
+        Utils.showToast('資料已匯出');
+    } catch (error) {
+        console.error('匯出資料失敗:', error);
+        showError('匯出資料失敗');
+    }
+},
+
+// 在 ReportExporter.importJsonData 函數中，修改以下部分
 
 importJsonData: function(file) {
     return new Promise((resolve, reject) => {
@@ -2080,11 +2100,40 @@ importJsonData: function(file) {
         const reader = new FileReader();
         reader.onload = (event) => {
             try {
-                const backupData = JSON.parse(event.target.result);  // ← 這裡定義 backupData
+                const backupData = JSON.parse(event.target.result);
                 
-                // ========== 完整性檢查 ==========
+                // ========== 檢查並轉換資料格式 ==========
+                let data;
+                let hasDataWrapper = false;
+                
+                // 檢查是否有 data 包裝層
+                if (backupData.data && backupData.data.accounts) {
+                    // 新格式：有 data 包裝層
+                    hasDataWrapper = true;
+                    data = backupData.data;
+                } else if (backupData.accounts) {
+                    // 舊格式：直接存放資料（exportJsonData 匯出的格式）
+                    data = backupData;
+                } else {
+                    reject(new Error('檔案格式錯誤：找不到 accounts 或 data.accounts'));
+                    return;
+                }
+                
+                // ========== 完整性檢查（兼容兩種格式）==========
                 if (typeof DataValidator !== 'undefined' && DataValidator.validateBackupIntegrity) {
-                    const validation = DataValidator.validateBackupIntegrity(backupData);
+                    // 建立一個臨時的完整備份物件來進行驗證
+                    const validationBackup = {
+                        version: backupData.version || '1.0',
+                        backupTime: backupData.backupTime || backupData.exportDate || new Date().toISOString(),
+                        data: data
+                    };
+                    
+                    // 如果匯出的檔案有 checksum，一併帶入
+                    if (backupData.checksum) {
+                        validationBackup.checksum = backupData.checksum;
+                    }
+                    
+                    const validation = DataValidator.validateBackupIntegrity(validationBackup);
                     
                     if (!validation.valid) {
                         const errorMsg = '備份檔案驗證失敗：\n' + validation.errors.join('\n');
@@ -2104,7 +2153,7 @@ importJsonData: function(file) {
                     const summary = validation.summary;
                     const confirmMsg = `📋 備份檔案資訊：
                     
-📅 備份時間：${backupData.backupTime || '未知'}
+📅 備份時間：${validationBackup.backupTime || '未知'}
 🏦 帳戶數量：${summary.accountCount}
 📝 交易筆數：${summary.transactionCount}
 💰 預算項目：${summary.budgetCount}
@@ -2116,22 +2165,16 @@ importJsonData: function(file) {
                         reject(new Error('使用者取消匯入'));
                         return;
                     }
+                } else {
+                    // 沒有驗證器時，使用簡單確認
+                    if (!confirm(`確定要匯入此備份檔案嗎？\n\n交易筆數：${data.transactions?.length || 0}\n帳戶數量：${data.accounts?.length || 0}`)) {
+                        reject(new Error('使用者取消匯入'));
+                        return;
+                    }
                 }
                 // ========== 檢查結束 ==========
                 
-                // 處理資料格式（相容新舊版本）
-                let data;
-                if (!backupData.data) {
-                    // 舊版備份格式
-                    if (!backupData.accounts || !backupData.transactions) { 
-                        reject(new Error('檔案格式錯誤')); 
-                        return; 
-                    }
-                    data = backupData;
-                } else {
-                    data = backupData.data;
-                }
-                
+                // 處理使用者名稱
                 const importedUserName = backupData.userName || data.userName || '';
                 const currentUserName = UserProfile.getCurrentUserName();
                 if (importedUserName && importedUserName !== currentUserName) {
@@ -2152,6 +2195,8 @@ importJsonData: function(file) {
                 AppState.setTransactions(data.transactions || []);
                 AppState.setBudgets(data.budgets || {});
                 AppState.setCategoryStructure(data.categoryStructure || {});
+                
+                // 清理無效的定期規則
                 const cleanedRules = DataValidator.sanitizeRecurringRules(data.recurringRules || [], AppState.getAccounts());
                 AppState.setRecurringRules(cleanedRules);
                 
@@ -2162,7 +2207,7 @@ importJsonData: function(file) {
                     resolve(); 
                 }).catch(error => { 
                     hideLoading(); 
-                    reject(new Error('儲存資料失敗')); 
+                    reject(new Error('儲存資料失敗：' + error.message)); 
                 });
             } catch (error) { 
                 console.error('匯入錯誤:', error);
